@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Resolve Fault</h4>
+                    <a href="{% url 'maintenance:fault_list' %}" class="btn btn-secondary btn-sm">Back</a>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <h5>Fault Information</h5>
+                            <p><strong>Machine:</strong> {{ fault.machine.name }}</p>
+                            <p><strong>Location:</strong> {{ fault.location }}</p>
+                            <p><strong>Severity:</strong> 
+                                <span class="badge {% if fault.severity == 'critical' %}bg-danger{% elif fault.severity == 'high' %}bg-warning{% elif fault.severity == 'medium' %}bg-info{% else %}bg-success{% endif %}">
+                                    {{ fault.get_severity_display }}
+                                </span>
+                            </p>
+                            <p><strong>Description:</strong> {{ fault.description }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="resolution_notes" class="form-label">Resolution Notes</label>
+                            <textarea name="resolution_notes" id="resolution_notes" class="form-control" rows="4" required></textarea>
+                            <small class="form-text text-muted">Please provide detailed notes about the actions taken to resolve this fault.</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Mark as Resolved</button>
+                            <a href="{% url 'maintenance:fault_list' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

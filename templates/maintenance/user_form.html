@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">{{ action }} User</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% if action == 'Add' %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="id_username" name="username" 
+                               value="{{ user.username|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="id_password" name="password" 
+                               required>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="id_first_name" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="id_first_name" name="first_name" 
+                               value="{{ user.first_name|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_last_name" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="id_last_name" name="last_name" 
+                               value="{{ user.last_name|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="id_email" name="email" 
+                               value="{{ user.email|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_role" class="form-label">Role</label>
+                        <select class="form-select" id="id_role" name="role" required>
+                            {% for role in roles %}
+                            <option value="{{ role.id }}" {% if user and user.userprofile.role.id == role.id %}selected{% endif %}>
+                                {{ role.get_name_display }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">{{ action }} User</button>
+                        <a href="{% url 'maintenance:user_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Fault Records</h4>
+                    <div class="btn-group">
+                        <a href="{% url 'maintenance:fault_add' %}" class="btn btn-primary">Report New Fault</a>
+                        <a href="{% url 'maintenance:export_faults_excel' %}?{% for key,value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}" class="btn btn-success">Export to Excel</a>
+                        <a href="{% url 'maintenance:export_faults_pdf' %}?{% for key,value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}" class="btn btn-danger">Export to PDF</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label">Filter Type</label>
+                            <select name="filter_type" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All Faults</option>
+                                <option value="machine" {% if filter_type == 'machine' %}selected{% endif %}>By Machine</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3" id="machine-filter" {% if filter_type != 'machine' %}style="display: none;"{% endif %}>
+                            <label class="form-label">Machine</label>
+                            <select name="machine" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Machines</option>
+                                {% for machine in machines %}
+                                <option value="{{ machine.id }}" {% if machine_id == machine.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ machine.name }} ({{ machine.serial_number }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ start_date }}" onchange="this.form.submit()">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ end_date }}" onchange="this.form.submit()">
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Machine</th>
+                                    <th>Location</th>
+                                    <th>Fault Date</th>
+                                    <th>Reported At</th>
+                                    <th>Severity</th>
+                                    <th>Reported By</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fault in faults %}
+                                <tr>
+                                    <td>{{ fault.machine.name }}</td>
+                                    <td>{{ fault.location }}</td>
+                                    <td>{{ fault.fault_date|date:"Y-m-d" }}</td>
+                                    <td>{{ fault.reported_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <span class="badge {% if fault.severity == 'critical' %}bg-danger{% elif fault.severity == 'high' %}bg-warning{% elif fault.severity == 'medium' %}bg-info{% else %}bg-success{% endif %}">
+                                            {{ fault.get_severity_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ fault.reported_by.username }}</td>
+                                    <td>
+                                        <span class="badge {% if fault.status == 'resolved' %}bg-success{% elif fault.status == 'closed' %}bg-secondary{% else %}bg-primary{% endif %}">
+                                            {{ fault.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'maintenance:fault_detail' fault.id %}" class="btn btn-sm btn-info">View</a>
+                                            {% if fault.status == 'open' %}
+                                                <a href="{% url 'maintenance:fault_resolve' fault.id %}" class="btn btn-sm btn-success">Resolve</a>
+                                            {% elif fault.status == 'resolved' %}
+                                                <a href="{% url 'maintenance:fault_close' fault.id %}" class="btn btn-sm btn-secondary">Close</a>
+                                            {% endif %}
+                                            {% if user.is_superuser %}
+                                                <a href="{% url 'maintenance:fault_delete' fault.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No faults found matching the filters</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide machine filter based on filter type
+    const filterType = document.querySelector('select[name="filter_type"]');
+    const machineFilter = document.getElementById('machine-filter');
+    
+    filterType.addEventListener('change', function() {
+        if (this.value === 'machine') {
+            machineFilter.style.display = 'block';
+        } else {
+            machineFilter.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock extra_js %}

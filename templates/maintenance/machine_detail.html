@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Machine Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Machine Information</h5>
+                            <div class="mb-3">
+                                <strong>Name:</strong> {{ machine.name }}</div>
+                            <div class="mb-3">
+                                <strong>Serial Number:</strong> {{ machine.serial_number }}</div>
+                            <div class="mb-3">
+                                <strong>Location:</strong> {{ machine.location }}</div>
+                            <div class="mb-3">
+                                <strong>Status:</strong> 
+                                <span class="badge {% if machine.status == 'active' %}bg-success{% elif machine.status == 'maintenance' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ machine.status|title }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Created:</strong> {{ machine.created_at|date:"F j, Y" }}</div>
+                            <div class="mb-3">
+                                <strong>Last Updated:</strong> {{ machine.updated_at|date:"F j, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'maintenance:machines' %}" class="btn btn-secondary">Back to List</a>
+                        <a href="{% url 'maintenance:machine_edit' machine.id %}" class="btn btn-primary ms-2">Edit Machine</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

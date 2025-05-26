@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Fault Details</h4>
+                    <a href="{% url 'maintenance:fault_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Machine Information</h5>
+                            <p><strong>Name:</strong> {{ fault.machine.name }}</p>
+                            <p><strong>Serial Number:</strong> {{ fault.machine.serial_number }}</p>
+                            <p><strong>Location:</strong> {{ fault.machine.location }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Fault Information</h5>
+                            <p><strong>Fault Date:</strong> {{ fault.fault_date|date:"Y-m-d" }}</p>
+                            <p><strong>Reported At:</strong> {{ fault.reported_at|date:"Y-m-d H:i" }}</p>
+                            <p><strong>Severity:</strong> 
+                                <span class="badge {% if fault.severity == 'critical' %}bg-danger{% elif fault.severity == 'high' %}bg-warning{% elif fault.severity == 'medium' %}bg-info{% else %}bg-success{% endif %}">
+                                    {{ fault.get_severity_display }}
+                                </span>
+                            </p>
+                            <p><strong>Reported By:</strong> {{ fault.reported_by.username }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge {% if fault.status == 'resolved' %}bg-success{% elif fault.status == 'closed' %}bg-secondary{% else %}bg-primary{% endif %}">
+                                    {{ fault.get_status_display }}
+                                </span>
+                            </p>
+                            {% if fault.resolved_by %}
+                            <p><strong>Resolved By:</strong> {{ fault.resolved_by.username }}</p>
+                            <p><strong>Resolution Date:</strong> {{ fault.resolution_date|date:"Y-m-d H:i" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p>{{ fault.description }}</p>
+                    </div>
+
+                    {% if fault.resolution_notes %}
+                    <div class="mb-4">
+                        <h5>Resolution Notes</h5>
+                        <p>{{ fault.resolution_notes }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if photos.exists %}
+                    <div class="mb-4">
+                        <h5>Photos</h5>
+                        <div class="row">
+                            {% for photo in photos %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <a href="{{ photo.image.url }}" target="_blank">
+                                        <img src="{{ photo.image.url }}" class="card-img-top" alt="{{ photo.caption }}" style="height: 200px; object-fit: cover;">
+                                    </a>
+                                    <div class="card-body">
+                                        <p class="card-text">{{ photo.caption }}</p>
+                                        <small class="text-muted">Uploaded on {{ photo.created_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        No photos have been uploaded for this fault.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

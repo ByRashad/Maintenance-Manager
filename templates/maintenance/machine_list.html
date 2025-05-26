@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Machines</h2>
+        <a href="{% url 'maintenance:machine_add' %}" class="btn btn-primary mb-3">Add New Machine</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Serial Number</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for machine in machines %}
+                    <tr>
+                        <td>{{ machine.name }}</td>
+                        <td>{{ machine.serial_number }}</td>
+                        <td>{{ machine.location }}</td>
+                        <td>
+                            {% if machine.status == 'active' %}
+                            <span class="badge bg-success">Active</span>
+                            {% elif machine.status == 'maintenance' %}
+                            <span class="badge bg-warning">In Maintenance</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                        <a href="{% url 'maintenance:machine_detail' machine.pk %}" class="btn btn-primary btn-sm">View</a>
+                        {% if user.userprofile.can_add_users %}
+                        <a href="{% url 'maintenance:machine_edit' machine.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'maintenance:machine_delete' machine.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                        {% endif %}
+                    </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No machines found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

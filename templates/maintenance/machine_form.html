@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">{{ action }} Machine</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="id_name" name="name" 
+                               value="{{ machine.name|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_serial_number" class="form-label">Serial Number</label>
+                        <input type="text" class="form-control" id="id_serial_number" name="serial_number" 
+                               value="{{ machine.serial_number|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="id_location" name="location" 
+                               value="{{ machine.location|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_status" class="form-label">Status</label>
+                        <select class="form-select" id="id_status" name="status" required>
+                            <option value="" disabled {% if not machine %}selected{% endif %}>Select status</option>
+                            <option value="active" {% if machine.status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="maintenance" {% if machine.status == 'maintenance' %}selected{% endif %}>In Maintenance</option>
+                            <option value="inactive" {% if machine.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">{{ action }} Machine</button>
+                        <a href="{% url 'maintenance:machine_list' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

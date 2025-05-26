@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Delete User</h3>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete the user "{{ user.username }}"?</p>
+                <p>This action cannot be undone.</p>
+                <form action="." method="post" class="d-grid gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                    <a href="{% url 'maintenance:user_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

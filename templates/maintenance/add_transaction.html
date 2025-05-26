@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Add Transaction for {{ spare_part.item }} ({{ spare_part.code }})</h4>
+                    <a href="{% url 'maintenance:spare_part_transactions' spare_part.id %}" class="btn btn-sm btn-secondary">Back to History</a>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.transaction_type.id_for_label }}" class="form-label">Transaction Type</label>
+                            {{ form.transaction_type }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.quantity.id_for_label }}" class="form-label">Quantity</label>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            {{ form.quantity }}
+        </div>
+        <div class="form-group">
+            <label for="machine">Machine (for removal only)</label>
+            {{ form.machine }}
+        </div>
+        <div class="form-group">
+            <label for="transaction_date">Transaction Date</label>
+            {{ form.transaction_date }}
+        </div>
+        <div class="form-group">
+            <label for="notes">Notes</label>
+            {{ form.notes }}
+        </div>
+        <button type="submit" class="btn btn-primary">Add Transaction</button>
+        <a href="{% url 'maintenance:spare_parts_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

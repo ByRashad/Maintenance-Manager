@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Report New Fault</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="machine" class="form-label">Machine</label>
+                            <select name="machine" id="machine" class="form-select" required>
+                                <option value="">Select a machine</option>
+                                {% for machine in machines %}
+                                <option value="{{ machine.id }}">{{ machine.name }} ({{ machine.serial_number }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" name="location" id="location" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" class="form-control" rows="4" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fault_date" class="form-label">Fault Date</label>
+                            <input type="date" name="fault_date" id="fault_date" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="severity" class="form-label">Severity</label>
+                            <select name="severity" id="severity" class="form-select" required>
+                                <option value="">Select severity</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <!-- Photo uploads -->
+                        <div class="mb-3">
+                            <label class="form-label">Photos (up to 5)</label>
+                            <div class="row">
+                                {% for i in "12345" %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Photo {{ i }}</label>
+                                        <input type="file" name="photo_{{ i }}" class="form-control" accept="image/*">
+                                        <input type="text" name="caption_{{ i }}" class="form-control mt-2" placeholder="Optional caption">
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Report Fault</button>
+                            <a href="{% url 'maintenance:fault_list' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

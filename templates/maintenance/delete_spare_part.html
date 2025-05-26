@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Delete Spare Part</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the spare part:</p>
+                    <div class="alert alert-warning">
+                        <strong>{{ spare_part.code }} - {{ spare_part.item }}</strong>
+                        <br>
+                        Current Inventory: {{ spare_part.inventory }}
+                    </div>
+                    <form method="post" action="{% url 'maintenance:delete_spare_part' spare_part.id %}">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'maintenance:spare_parts_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

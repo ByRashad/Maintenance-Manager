@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Spare Part Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Spare Part Information</h5>
+                            <div class="mb-3">
+                                <strong>Name:</strong> {{ spare_part.name }}</div>
+                            <div class="mb-3">
+                                <strong>Part Number:</strong> {{ spare_part.part_number }}</div>
+                            <div class="mb-3">
+                                <strong>Description:</strong> {{ spare_part.description }}</div>
+                            <div class="mb-3">
+                                <strong>Manufacturer:</strong> {{ spare_part.manufacturer }}</div>
+                            <div class="mb-3">
+                                <strong>Stock Quantity:</strong> {{ spare_part.stock_quantity }}</div>
+                            <div class="mb-3">
+                                <strong>Minimum Stock:</strong> {{ spare_part.minimum_stock }}</div>
+                            <div class="mb-3">
+                                <strong>Unit Price:</strong> {{ spare_part.unit_price }}</div>
+                            <div class="mb-3">
+                                <strong>Created:</strong> {{ spare_part.created_at|date:"F j, Y" }}</div>
+                            <div class="mb-3">
+                                <strong>Last Updated:</strong> {{ spare_part.updated_at|date:"F j, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'maintenance:spare_parts_list' %}" class="btn btn-secondary">Back to List</a>
+                        <a href="{% url 'maintenance:edit_spare_part' spare_part.id %}" class="btn btn-primary ms-2">Edit Spare Part</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

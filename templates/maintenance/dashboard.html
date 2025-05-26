@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Top Spare Parts Chart
+    const topSparePartsCtx = document.getElementById('topSparePartsChart').getContext('2d');
+    new Chart(topSparePartsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ top_spare_parts_labels|safe }},
+            datasets: [{
+                label: 'Consumption',
+                data: {{ top_spare_parts_data|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Monthly Expenses Chart
+    const monthlyExpensesCtx = document.getElementById('monthlyExpensesChart').getContext('2d');
+    new Chart(monthlyExpensesCtx, {
+        type: 'line',
+        data: {
+            labels: {{ monthly_expenses_labels|safe }},
+            datasets: [{
+                label: 'Total Expenses',
+                data: {{ monthly_expenses_data|safe }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Machines</h5>
+                    <h2 class="card-text">{{ total_machines }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Active Faults</h5>
+                    <h2 class="card-text">{{ active_faults }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Faults</h5>
+                    <h2 class="card-text">{{ total_faults }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Spare Parts Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top Spare Parts by Consumption</h5>
+                    <a href="{% url 'maintenance:spare_parts_list' %}" class="btn btn-primary btn-sm">View All Spare Parts</a>
+                </div>
+                <div class="card-body">
+                    <canvas id="topSparePartsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Requests -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Pending Purchase Requests</h5>
+                    <a href="{% url 'maintenance:purchase_list' %}" class="btn btn-primary btn-sm">View All Requests</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Request #</th>
+                                    <th>Request Date</th>
+                                    <th>Items</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in pending_requests %}
+                                <tr>
+                                    <td>{{ request.request_number }}</td>
+                                    <td>{{ request.request_date|date:"Y-m-d" }}</td>
+                                    <td>{{ request.items.count }}</td>
+                                    <td>{{ request.total_price|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge {% if request.request_type == 'pending' %}bg-warning{% elif request.request_type == 'approved' %}bg-success{% else %}bg-info{% endif %}">
+                                            {{ request.get_request_type_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No pending requests</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Faults -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Faults</h5>
+                    <a href="{% url 'maintenance:fault_list' %}" class="btn btn-primary btn-sm">View All Faults</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Machine</th>
+                                    <th>Location</th>
+                                    <th>Severity</th>
+                                    <th>Reported At</th>
+                                    <th>Reported By</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fault in recent_faults %}
+                                <tr>
+                                    <td>{{ fault.machine.name }}</td>
+                                    <td>{{ fault.location }}</td>
+                                    <td>
+                                        <span class="badge {% if fault.severity == 'critical' %}bg-danger{% elif fault.severity == 'high' %}bg-warning{% elif fault.severity == 'medium' %}bg-info{% else %}bg-success{% endif %}">
+                                            {{ fault.get_severity_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ fault.reported_at|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ fault.reported_by.username }}</td>
+                                    <td>
+                                        <span class="badge {% if fault.status == 'resolved' %}bg-success{% elif fault.status == 'closed' %}bg-secondary{% else %}bg-primary{% endif %}">
+                                            {{ fault.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No recent faults reported</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Expenses Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Monthly Expenses</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyExpensesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Most Frequent Breakdowns -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Most Frequent Breakdowns</h5>
+                    <a href="{% url 'maintenance:fault_list' %}" class="btn btn-primary btn-sm">View All Faults</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Machine</th>
+                                    <th>Location</th>
+                                    <th>Breakdown Count</th>
+                                    <th>Last Breakdown</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for breakdown in frequent_breakdowns %}
+                                <tr>
+                                    <td>{{ breakdown.machine.name }}</td>
+                                    <td>{{ breakdown.machine.location }}</td>
+                                    <td>{{ breakdown.breakdown_count }}</td>
+                                    <td>{{ breakdown.last_breakdown|date:"Y-m-d" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No breakdown data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

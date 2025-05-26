@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Spare Parts Inventory</h2>
+        <div class="btn-group">
+            <a href="{% url 'maintenance:add_spare_part' %}" class="btn btn-primary">Add Spare Part</a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transactionModal">
+                New Transaction
+            </button>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transactionModalLabel">New Spare Part Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transactionForm" method="post">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <input type="hidden" id="selected_spare_part_id" name="spare_part_id">
+                            <div class="col-md-6">
+                                <label for="spare_part" class="form-label">Spare Part</label>
+                                <select id="spare_part_select" class="form-select" required>
+                                    <option value="">Select Spare Part</option>
+                                    {% for part in spare_parts %}
+                                    <option value="{{ part.id }}">{{ part.code }} - {{ part.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="transaction_type" class="form-label">Transaction Type</label>
+                                <select name="transaction_type" class="form-select" required>
+                                    <option value="add">Add to Inventory</option>
+                                    <option value="remove">Remove from Inventory</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input type="number" name="quantity" class="form-control" min="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="machine" class="form-label">Machine (Required for removal)</label>
+                                <select name="machine" class="form-select">
+                                    <option value="">Select Machine</option>
+                                    {% for machine in machines %}
+                                    <option value="{{ machine.id }}">{{ machine.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="notes" class="form-label">Notes (Optional)</label>
+                                <textarea name="notes" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" form="transactionForm" class="btn btn-primary">Save Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Filter Inventory</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="{{ filter_form.start_date.id_for_label }}" class="form-label">Start Date</label>
+                    {{ filter_form.start_date }}
+                </div>
+                <div class="col-md-3">
+                    <label for="{{ filter_form.end_date.id_for_label }}" class="form-label">End Date</label>
+                    {{ filter_form.end_date }}
+                </div>
+                <div class="col-md-2">
+                    <label for="{{ filter_form.export_format.id_for_label }}" class="form-label">Export</label>
+                    {{ filter_form.export_format }}
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Spare Parts Section -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Item</th>
+                            <th>Current Inventory</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for spare_part in spare_parts %}
+                        <tr>
+                            <td>{{ spare_part.code }}</td>
+                            <td>{{ spare_part.item }}</td>
+                            <td>{{ spare_part.inventory }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'maintenance:spare_part_transactions' spare_part.id %}" class="btn btn-sm btn-info">Transactions</a>
+                                    <a href="{% url 'maintenance:add_transaction' spare_part.id %}" class="btn btn-sm btn-success">Add Transaction</a>
+                                    <a href="{% url 'maintenance:delete_spare_part' spare_part.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this spare part?')">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No spare parts found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Basic Information</h5>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <strong>Username:</strong> {{ user.username }}
+                                </div>
+                                <div class="list-group-item">
+                                    <strong>Full Name:</strong> {{ user.get_full_name }}
+                                </div>
+                                <div class="list-group-item">
+                                    <strong>Email:</strong> {{ user.email }}
+                                </div>
+                                <div class="list-group-item">
+                                    <strong>Role:</strong> {{ user_profile.role.name }}
+                                </div>
+                                <div class="list-group-item">
+                                    <strong>Permissions:</strong>
+                                    <ul class="list-unstyled">
+                                        {% if user_profile.role.can_add_users %}
+                                            <li>Can add users</li>
+                                        {% endif %}
+                                        {% if user_profile.role.can_delete_users %}
+                                            <li>Can delete users</li>
+                                        {% endif %}
+                                        {% if user_profile.role.can_view_all %}
+                                            <li>Can view all data</li>
+                                        {% endif %}
+                                        {% if user_profile.role.can_export %}
+                                            <li>Can export data</li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Actions</h5>
+                            <div class="btn-group-vertical w-100" role="group">
+                                <a href="{% url 'maintenance:user_edit' user.pk %}" class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> Edit Profile
+                                </a>
+                                {% if user_profile.role.can_delete_users %}
+                                    <a href="{% url 'maintenance:user_delete' user.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">
+                                        <i class="fas fa-trash"></i> Delete User
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

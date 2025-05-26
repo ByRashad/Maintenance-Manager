@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Purchase Request #{{ purchase.request_number }}</h2>
+        <div class="btn-group">
+            <a href="{% url 'maintenance:purchase_list' %}" class="btn btn-secondary">Back to List</a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'maintenance:purchase_edit' purchase.pk %}" class="btn btn-primary">Edit Purchase</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Type:</strong> {{ purchase.get_request_type_display }}</p>
+                    <p><strong>Request Date:</strong> {{ purchase.request_date }}</p>
+                    <p><strong>Submission Date:</strong> {{ purchase.submission_date }}</p>
+                    <p><strong>Additional Info:</strong> {{ purchase.additional_info }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Total Items:</strong> {{ purchase.get_item_count }}</p>
+                    <p><strong>Total Price:</strong> {{ total_price }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Purchase Items</h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                Add Item
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Received Quantity</th>
+                            <th>Unit</th>
+                            <th>Price</th>
+                            <th>Invoice Type</th>
+                            <th>Execution Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.product }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.received_quantity }}</td>
+                            <td>{{ item.unit_of_measurement }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.get_invoice_type_display }}</td>
+                            <td>{{ item.execution_date }}</td>
+                            <td>
+                                {% if request.user.is_staff %}
+                                <a href="" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editItemModal{{ item.pk }}">Edit</a>
+                                <form method="post" action="{% url 'maintenance:purchase_item_delete' purchase.pk item.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this item?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Total Price:</td>
+                            <td colspan="4" class="fw-bold">{{ total_price }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Item Modals -->
+{% for item in items %}
+<div class="modal fade" id="editItemModal{{ item.pk }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'maintenance:purchase_item_edit' purchase.pk item.pk %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="id_invoice_type" class="form-label">Invoice Type</label>
+                        <select class="form-select" id="id_invoice_type" name="invoice_type">
+                            <option value="invoice" {% if item.invoice_type == 'invoice' %}selected{% endif %}>Invoice</option>
+                            <option value="local" {% if item.invoice_type == 'local' %}selected{% endif %}>Local</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_received_quantity" class="form-label">Received Quantity</label>
+                        <input type="number" class="form-control" id="id_received_quantity" name="received_quantity" value="{{ item.received_quantity }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="id_price" name="price" value="{{ item.price }}" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_submission_date" class="form-label">Submission Date</label>
+                        <input type="date" class="form-control" id="id_submission_date" name="submission_date" value="{{ item.submission_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="id_notes" name="notes" rows="3">{{ item.notes }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Import Spare Parts</h4>
+                    <a href="{% url 'maintenance:spare_parts_list' %}" class="btn btn-sm btn-secondary">Back to List</a>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.excel_file.id_for_label }}" class="form-label">Excel File</label>
+                            {{ form.excel_file }}
+                            <div class="form-text">Select an Excel file containing columns: Code, Item, Machine, Inventory</div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary">Import Spare Parts</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
